@@ -1,4 +1,4 @@
-# Zenbot 🌿 — Mental Health Support Chatbot (MERN stack)
+# Zenbot 🌿 — Mental Health Support Chatbot 
 
 Zenbot is a mental-health support chatbot implemented as a MERN stack
 application (MongoDB, Express, React, Node.js). It offers a private chat
@@ -49,7 +49,7 @@ compatible) when `OPENAI_API_KEY` is set, or use a local embedding model
    - If the message matches crisis patterns, the backend returns a
      crisis reply with helpline numbers.
 4. Frontend renders the chat messages for the user.
-# Zenbot 🌿 — Mental Health Support Chatbot (MERN stack)
+# Zenbot 🌿 — Mental Health Support Chatbot 
 
 Zenbot is a mental-health support chatbot implemented as a MERN stack
 application (MongoDB, Express, React, Node.js). It offers a private chat
@@ -100,17 +100,6 @@ compatible) when `OPENAI_API_KEY` is set, or use a local embedding model
    - If the message matches crisis patterns, the backend returns a
      crisis reply with helpline numbers.
 4. Frontend renders the chat messages for the user.
-
-## Diagram
-
-```mermaid
-flowchart LR
-  User[User Browser] -->|Interacts| Frontend[Frontend (Vite + React)]
-  Frontend -->|REST /api/*| Backend[Backend (Express)]
-  Backend -->|Reads/Writes| Mongo[(MongoDB Atlas / MongoDB)]
-  Backend -->|Optional| OpenAI[Hosted LLM / Embeddings]
-  Backend -->|Optional| LocalRag[Local embeddings (@xenova) + Knowledge chunks]
-```
 
 ## Built With
 
