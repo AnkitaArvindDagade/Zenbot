@@ -1,33 +1,137 @@
 # Zenbot 🌿 — Mental Health Support Chatbot (MERN stack)
 
-Zenbot has been rebuilt from the original Streamlit app into a full **MERN**
-stack app (MongoDB, Express, React, Node.js), with a login/signup flow, saved
-chat history per user, and a calmer, more polished animated UI.
+Zenbot is a mental-health support chatbot implemented as a MERN stack
+application (MongoDB, Express, React, Node.js). It offers a private chat
+space per user, persistent chat history, and a responsive React UI built
+with Vite. The app can run with or without a hosted AI key: when an
+`OPENAI_API_KEY` is present the backend uses a hosted LLM; otherwise it
+falls back to a rule-based empathetic reply engine. Optional RAG
+capabilities let the bot ground replies from a small curated knowledge
+base stored in MongoDB.
 
-## What was actually broken, and how it was fixed
+Below you'll find the architecture, workflow, a diagram, the tech stack,
+and the live repository/deployment link.
 
-The old app called a Hugging Face **`hf-inference`** provider directly with a
-hardcoded model id. Hugging Face frequently changes which models are
-available on that free serverless provider, so the app broke with:
+## Project Info
 
+- Name: Zenbot — Mental Health Support Chatbot
+- Purpose: Supportive listening, coping techniques, and lightweight
+  retrieval-augmented replies for non-clinical mental health support.
+- Repo: https://github.com/AnkitaArvindDagade/Zenbot.git
+- URL: https://zenbot-teal.vercel.app
+
+## Architecture
+
+Zenbot consists of two primary components:
+
+- Frontend: Vite + React app that handles user authentication, UI, and
+  communicates with the backend API under `/api/*`.
+- Backend: Express server that exposes the REST API, stores data in
+  MongoDB, handles auth with JWT, runs the reply engine and optional
+  RAG ingestion.
+
+The backend may call a hosted LLM/embeddings provider (OpenAI or
+compatible) when `OPENAI_API_KEY` is set, or use a local embedding model
+(`@xenova/transformers`) when running fully local.
+
+## Workflow
+
+1. User logs in / signs up via the frontend.
+2. The frontend creates or selects a chat and posts user messages to
+   `/api/chats/:id/messages`.
+3. Backend appends the user message to the chat, calls `getBotReply()` and
+   saves the bot reply.
+   - If `OPENAI_API_KEY` is set, the backend sends a chat completion
+     request to the configured `OPENAI_BASE_URL` with a system prompt and
+     optional retrieved context.
+   - If no key or the API call fails, the backend uses a rule-based
+     engine that replies with empathetic prompts and optional RAG snippets.
+   - If the message matches crisis patterns, the backend returns a
+     crisis reply with helpline numbers.
+4. Frontend renders the chat messages for the user.
+# Zenbot 🌿 — Mental Health Support Chatbot (MERN stack)
+
+Zenbot is a mental-health support chatbot implemented as a MERN stack
+application (MongoDB, Express, React, Node.js). It offers a private chat
+space per user, persistent chat history, and a responsive React UI built
+with Vite. The app can run with or without a hosted AI key: when an
+`OPENAI_API_KEY` is present the backend uses a hosted LLM; otherwise it
+falls back to a rule-based empathetic reply engine. Optional RAG
+capabilities let the bot ground replies from a small curated knowledge
+base stored in MongoDB.
+
+Below you'll find the architecture, workflow, a diagram, the tech stack,
+and the live repository/deployment link.
+
+## Project Info
+
+- Name: Zenbot — Mental Health Support Chatbot
+- Purpose: Supportive listening, coping techniques, and lightweight
+  retrieval-augmented replies for non-clinical mental health support.
+- Repo: https://github.com/AnkitaArvindDagade/Zenbot.git
+- URL: https://zenbot-teal.vercel.app
+
+## Architecture
+
+Zenbot consists of two primary components:
+
+- Frontend: Vite + React app that handles user authentication, UI, and
+  communicates with the backend API under `/api/*`.
+- Backend: Express server that exposes the REST API, stores data in
+  MongoDB, handles auth with JWT, runs the reply engine and optional
+  RAG ingestion.
+
+The backend may call a hosted LLM/embeddings provider (OpenAI or
+compatible) when `OPENAI_API_KEY` is set, or use a local embedding model
+(`@xenova/transformers`) when running fully local.
+
+## Workflow
+
+1. User logs in / signs up via the frontend.
+2. The frontend creates or selects a chat and posts user messages to
+   `/api/chats/:id/messages`.
+3. Backend appends the user message to the chat, calls `getBotReply()` and
+   saves the bot reply.
+   - If `OPENAI_API_KEY` is set, the backend sends a chat completion
+     request to the configured `OPENAI_BASE_URL` with a system prompt and
+     optional retrieved context.
+   - If no key or the API call fails, the backend uses a rule-based
+     engine that replies with empathetic prompts and optional RAG snippets.
+   - If the message matches crisis patterns, the backend returns a
+     crisis reply with helpline numbers.
+4. Frontend renders the chat messages for the user.
+
+## Diagram
+
+```mermaid
+flowchart LR
+  User[User Browser] -->|Interacts| Frontend[Frontend (Vite + React)]
+  Frontend -->|REST /api/*| Backend[Backend (Express)]
+  Backend -->|Reads/Writes| Mongo[(MongoDB Atlas / MongoDB)]
+  Backend -->|Optional| OpenAI[Hosted LLM / Embeddings]
+  Backend -->|Optional| LocalRag[Local embeddings (@xenova) + Knowledge chunks]
 ```
-Bad request: Model not supported by provider hf-inference
-```
 
-The new backend (`backend/utils/botEngine.js`) never hard-fails like that:
+## Built With
 
-1. If you set an `OPENAI_API_KEY` in `backend/.env`, Zenbot calls a real LLM
-   for natural, context-aware replies. It works with OpenAI itself, or any
-   OpenAI-*compatible* endpoint (Groq, OpenRouter, Together AI, a local
-   Ollama server, etc.) — just change `OPENAI_BASE_URL` / `OPENAI_MODEL`.
-2. If no key is set, or that call fails for any reason (rate limit, bad
-   model name, network hiccup), it automatically falls back to a **built-in,
-   rule-based empathetic reply engine** — so the chatbot always responds
-   instead of showing a red error box. **No API key is required to run the
-   app at all.**
-3. Messages that mention self-harm or suicide are detected and answered with
-   a caring message plus crisis-line numbers, regardless of which engine is
-   active.
+- React, Vite (frontend)
+- Node.js, Express, Mongoose (backend)
+- JWT for auth (`jsonwebtoken`)
+- Optional local embeddings: `@xenova/transformers`
+- Dev tools: `nodemon`, `concurrently`
+
+## Live / Deployment
+
+- Repository: https://github.com/AnkitaArvindDagade/Zenbot.git
+- Frontend: https://zenbot-teal.vercel.app
+- Backend: https://zenbot-api-dx8t.onrender.com/api/health
+
+## Deployment
+
+- Frontend: Vercel (Hobby / free tier) — hosts the built `frontend/dist`.
+- Backend: Render (Free web service) — deploy the Express API using the
+  provided `render.yaml` blueprint.
+- Database: MongoDB Atlas M0 (free cluster) — use as the app's `MONGO_URI`.
 
 ## Retrieval-augmented generation (RAG)
 
@@ -104,7 +208,7 @@ zenbot-mern/
 npm run install:all
 ```
 
-This installs dependencies for both `backend/` and `frontend/`.
+This installs dependencies for both `backend/` and `frontend`.
 
 Then configure the backend:
 
@@ -129,25 +233,12 @@ From the **root** `zenbot-mern` folder, run both servers together:
 npm run dev
 ```
 
-- Backend API → http://localhost:5000
-- Frontend app → http://localhost:5173 (Vite proxies `/api` calls to the backend automatically)
-
-Open **http://localhost:5173**, create an account, and start chatting.
-
-(You can also run them in two separate terminals with `npm run dev:backend`
-and `npm run dev:frontend` if you prefer.)
-
 ## 4. Building for production
 
 ```bash
 cd frontend
 npm run build
 ```
-
-This outputs static files to `frontend/dist`, which you can serve with any
-static host (Vercel, Netlify, Nginx, etc.). Deploy `backend/` separately
-(Render, Railway, Fly.io, a VPS, …) and point the frontend's API calls at
-its public URL, or serve `frontend/dist` from the Express app itself.
 
 ## Notes on the mental health content
 
